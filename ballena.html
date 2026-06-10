@@ -170,14 +170,89 @@ color:white;
 font-weight:bold;
 }
 
+/* BOTÓN MENÚ */
+.home-btn{
+position:fixed;
+top:10px;
+right:10px;
+z-index:999999;
+border:none;
+padding:10px 15px;
+font-size:16px;
+font-weight:bold;
+border-radius:12px;
+background:white;
+color:#005f9c;
+cursor:pointer;
+box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+
+/* CONTROLES MEJORADOS */
+#controls{
+position:absolute;
+bottom:35px;
+left:0;
+width:100%;
+display:flex;
+justify-content:center;
+gap:20px;
+z-index:9999;
+padding-bottom:env(safe-area-inset-bottom);
+}
+
+.btn{
+border:none;
+padding:20px 30px;
+font-size:30px;
+border-radius:18px;
+font-weight:bold;
+min-width:100px;
+min-height:75px;
+touch-action:manipulation;
+}
+
 @media (max-width:768px){
-#whale{font-size:95px}
+
+#whale{
+font-size:85px;
+left:15px;
+bottom:190px;
+}
+
+#controls{
+bottom:55px;
+gap:20px;
+}
+
+.btn{
+font-size:32px;
+padding:18px 26px;
+min-width:100px;
+min-height:75px;
+}
+
+#score{
+font-size:20px;
+}
+
+#lives{
+font-size:26px;
+}
+
+.home-btn{
+font-size:14px;
+padding:10px 12px;
+}
+
 }
 </style>
 </head>
 
 <body>
-
+<button class="home-btn"
+onclick="window.location.href='index.html'">
+🏠 Menú
+</button>
 <div id="game">
 
 <!-- START SCREEN -->
@@ -241,7 +316,7 @@ const finalMedal=document.getElementById("finalMedal");
 
 const isMobile=window.innerWidth<768;
 
-let whaleY=160;
+let whaleY=220;
 let score=0;
 let lives=3;
 let running=false;
@@ -303,9 +378,19 @@ showMessage("Nivel 3 🔴");
 
 /* MOVIMIENTO */
 function jump(){
+
 if(!running)return;
+
 whaleY+=140;
+
+const maxHeight=window.innerHeight-220;
+
+if(whaleY>maxHeight){
+whaleY=maxHeight;
+}
+
 whale.style.bottom=whaleY+"px";
+
 }
 
 function dive(){
@@ -348,7 +433,12 @@ obj.dataset.type="bad";
 }
 
 obj.style.left=window.innerWidth+"px";
-obj.style.bottom=(80+Math.random()*200)+"px";
+const minHeight=40;
+const maxHeight=window.innerHeight-220;
+
+obj.style.bottom=
+(minHeight+Math.random()*(maxHeight-minHeight))
++"px";
 
 game.appendChild(obj);
 
