@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦐 El Gran Laberinto del Krill </title>
+
+<style>
+:root{
+    --cell-size:min(6.2vw,6.2vh,68px);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    height:100vh;
+    overflow:hidden;
+    background:linear-gradient(to bottom,#6ed6ff,#0077b6,#023e8a);
+    color:white;
+    text-align:center;
+}
+
+.ocean{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    z-index:-2;
+}
+
+.bubble{
+    position:absolute;
+    bottom:-50px;
+    font-size:30px;
+    animation:rise linear infinite;
+    opacity:.8;
+}
+
+@keyframes rise{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(-120vh);
+    }
+}
+
+.fish{
+    position:absolute;
+    font-size:40px;
+    animation:swim 18s linear infinite;
+}
+
+@keyframes swim{
+    from{
+        transform:translateX(-150px);
+    }
+    to{
+        transform:translateX(calc(100vw + 200px));
+    }
+}
+
+.decor-bottom{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    font-size:40px;
+    z-index:-1;
+    pointer-events:none;
+}
+
+.container{
+    width:min(98vw,1400px);
+    height:100vh;
+    margin:auto;
+    padding:0.5vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    gap:0.4vh;
+}
+
+h1{
+    font-size:clamp(18px,1.9vw,29px);
+    margin-bottom:4px;
+    margin-top:2px;
+}
+
+.topbar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
+    font-size:clamp(16px,1.5vw,24px);
+    margin-bottom:4px;
+}
+
+#maze{
+    display:grid;
+    gap:2px;
+    justify-content:center;
+    margin:auto;
+    width:max-content;
+    max-width:95vw;
+    max-height:80vh;
+}
+
+.cell{
+    width:var(--cell-size);
+    height:var(--cell-size);
+    min-width:24px;
+    min-height:24px;
+    background:rgba(255,255,255,.15);
+    border:2px solid rgba(255,255,255,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    user-select:none;
+}
+
+.wall{
+    background:#012a4a;
+}
+
+.path{
+    background:#eefaff;
+    border:2px solid rgba(255,255,255,.95);
+}
+
+.player{
+    position:absolute;
+    width:calc(var(--cell-size) * 0.70);
+    height:calc(var(--cell-size) * 0.70);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:calc(var(--cell-size) * 0.65);
+    pointer-events:none;
+    transition:.20s;
+    z-index:20;
+    filter:
+        drop-shadow(0 0 2px #000)
+        drop-shadow(0 0 8px #fff)
+        drop-shadow(0 0 12px #000);
+}
+
+#mazeWrapper{
+    position:relative;
+    display:inline-block;
+    margin:auto;
+}
+
+.controls{
+    margin-top:2px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+}
+
+.controls button{
+    width:clamp(48px,5.2vw,65px);
+    height:clamp(48px,5.2vw,65px);
+    font-size:clamp(24px,2.8vw,34px);
+    border:none;
+    border-radius:25px;
+    cursor:pointer;
+    background:white;
+}
+
+.row{
+    display:flex;
+    gap:10px;
+}
+
+.panel{
+    margin-top:4px;
+    font-size:clamp(16px,1.8vw,24px);
+}
+
+#message{
+    margin-top:2px;
+    font-size:clamp(16px,1.6vw,24px);
+    min-height:28px;
+}
+
+#finalScreen{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    padding:20px;
+    z-index:100;
+}
+
+#finalScreen h2{
+    font-size:clamp(40px,7vw,80px);
+    margin-bottom:20px;
+}
+
+#finalScreen p{
+    font-size:clamp(24px,4vw,45px);
+    margin:10px;
+}
+
+#restart{
+    margin-top:20px;
+    font-size:35px;
+    padding:20px 40px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+}
+
+@media (max-height:800px){
+
+    :root{
+        --cell-size:min(4.2vw,4.2vh,44px);
+    }
+
+    h1{
+        font-size:clamp(18px,2vw,28px);
+    }
+
+    .topbar{
+        font-size:clamp(14px,1.2vw,20px);
+    }
+}
+
+@media (max-width:768px){
+
+    :root{
+        --cell-size:min(6vw,5vh,38px);
+    }
+
+    .controls button{
+        width:82px;
+        height:82px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="ocean" id="ocean"></div>
+
+<div class="decor-bottom">
+🌿 🪸 🌿 🪸 🌿 🪸 🌿 🪸 🌿
+</div>
+
+<div class="container">
+
+<h1>🦐 El Gran Laberinto del Krill</h1>
+
+<div class="topbar">
+<div>🎯 Nivel: <span id="level">1</span></div>
+<div>⭐ Puntos: <span id="score">0</span></div>
+<div>🏅 Medalla: <span id="medal">-</span></div>
+</div>
+
+<div id="mazeWrapper">
+    <div id="maze"></div>
+    <div id="player" class="player">🐳</div>
+</div>
+
+<div class="panel">
+Objetivo: Llega al Krill 🦐
+</div>
+
+<div id="message"></div>
+
+<div class="controls">
+    <button id="up">⬆️</button>
+
+    <div class="row">
+        <button id="left">⬅️</button>
+        <button id="down">⬇️</button>
+        <button id="right">➡️</button>
+    </div>
+</div>
+
+</div>
+
+<div id="finalScreen">
+    <h2>🏆 FELICIDADES</h2>
+
+    <p>Completaste todos los niveles.</p>
+
+    <p>⭐ Puntaje Final: <span id="finalScore"></span></p>
+
+    <p>🏅 Medalla Final: <span id="finalMedal"></span></p>
+
+    <button id="restart">🔄 Jugar otra vez</button>
+</div>
+
+<script>
+const mazeEl = document.getElementById("maze");
+const playerEl = document.getElementById("player");
+
+const levels = [
+    {size:5, medal:"🥉 Explorador Marino"},
+    {size:7, medal:"🥈 Protector del Océano"},
+    {size:9, medal:"🥇 Héroe de las Ballenas"}
+];
+
+let currentLevel = 0;
+let score = 0;
+
+let maze = [];
+let player = {x:0,y:0};
+let goal = {x:0,y:0};
+
+const specials = {};
+
+function createOcean(){
+    const ocean = document.getElementById("ocean");
+
+    for(let i=0;i<35;i++){
+        const b = document.createElement("div");
+        b.className="bubble";
+        b.innerHTML="🫧";
+        b.style.left=Math.random()*100+"%";
+        b.style.animationDuration=(6+Math.random()*10)+"s";
+        b.style.fontSize=(20+Math.random()*30)+"px";
+        ocean.appendChild(b);
+    }
+
+    for(let i=0;i<8;i++){
+        const f=document.createElement("div");
+        f.className="fish";
+        f.innerHTML="🐠";
+        f.style.top=(10+Math.random()*70)+"%";
+        f.style.animationDelay=(Math.random()*10)+"s";
+        f.style.fontSize=(30+Math.random()*30)+"px";
+        ocean.appendChild(f);
+    }
+}
+
+createOcean();
+
+function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+}
+
+function generateMaze(size){
+
+    const dim = size*2+1;
+
+    maze = Array.from({length:dim},()=>Array(dim).fill(1));
+
+    function carve(x,y){
+        maze[y][x]=0;
+
+        const dirs=[
+            [0,-2],
+            [2,0],
+            [0,2],
+            [-2,0]
+        ];
+
+        shuffle(dirs);
+
+        for(const [dx,dy] of dirs){
+
+            const nx=x+dx;
+            const ny=y+dy;
+
+            if(
+                nx>0 &&
+                ny>0 &&
+                nx<dim-1 &&
+                ny<dim-1 &&
+                maze[ny][nx]===1
+            ){
+                maze[y+dy/2][x+dx/2]=0;
+                carve(nx,ny);
+            }
+        }
+    }
+
+    carve(1,1);
+
+    player={x:1,y:1};
+    goal={x:dim-2,y:dim-2};
+
+    createSpecialObjects();
+    renderMaze();
+}
+
+function createSpecialObjects(){
+
+    for(const k in specials){
+        delete specials[k];
+    }
+
+    const items = [
+        {emoji:"⭐",points:20,count:3},
+        {emoji:"🫧",points:10,count:4},
+        {emoji:"🛍️",points:-10,count:3}
+    ];
+
+    items.forEach(item=>{
+        let placed=0;
+
+        while(placed<item.count){
+
+            let x=Math.floor(Math.random()*maze[0].length);
+            let y=Math.floor(Math.random()*maze.length);
+
+            if(
+                maze[y][x]===0 &&
+                !(x===1 && y===1) &&
+                !(x===goal.x && y===goal.y)
+            ){
+                const key=x+"_"+y;
+
+                if(!specials[key]){
+                    specials[key]={
+                        emoji:item.emoji,
+                        points:item.points
+                    };
+                    placed++;
+                }
+            }
+        }
+    });
+}
+
+function renderMaze(){
+
+    mazeEl.innerHTML="";
+
+    mazeEl.style.gridTemplateColumns=
+        `repeat(${maze[0].length}, var(--cell-size))`;
+
+    maze.forEach((row,y)=>{
+
+        row.forEach((cell,x)=>{
+
+            const div=document.createElement("div");
+
+            div.className="cell "+(cell?"wall":"path");
+
+            if(x===goal.x && y===goal.y){
+                div.innerHTML="🦐";
+            }
+
+            const key=x+"_"+y;
+
+            if(specials[key]){
+                div.innerHTML=specials[key].emoji;
+            }
+
+            mazeEl.appendChild(div);
+        });
+    });
+
+    updatePlayer();
+}
+
+function updatePlayer(){
+
+    const cell =
+        document.querySelector(".cell");
+
+    if(!cell) return;
+
+    const cellSize = cell.offsetWidth + 2;
+
+    const whaleSize = cell.offsetWidth * 0.70;
+
+    playerEl.style.width = whaleSize + "px";
+    playerEl.style.height = whaleSize + "px";
+    playerEl.style.fontSize = (whaleSize * 0.85) + "px";
+
+    playerEl.style.left =
+        (player.x * cellSize) +
+        ((cell.offsetWidth - whaleSize)/2) + "px";
+
+    playerEl.style.top =
+        (player.y * cellSize) +
+        ((cell.offsetHeight - whaleSize)/2) + "px";
+}
+
+function move(dx,dy){
+
+    const nx=player.x+dx;
+    const ny=player.y+dy;
+
+    if(
+        ny<0 ||
+        nx<0 ||
+        ny>=maze.length ||
+        nx>=maze[0].length
+    ) return;
+
+    if(maze[ny][nx]===1) return;
+
+    player.x=nx;
+    player.y=ny;
+
+    const key=nx+"_"+ny;
+
+    if(specials[key]){
+
+        score += specials[key].points;
+
+        document.getElementById("score").textContent=score;
+
+        document.getElementById("message").innerHTML=
+            specials[key].emoji+" "+(specials[key].points>0?"+":"")+
+            specials[key].points+" puntos";
+
+        delete specials[key];
+        renderMaze();
+    }
+
+    updatePlayer();
+
+    if(nx===goal.x && ny===goal.y){
+        nextLevel();
+    }
+}
+
+function nextLevel(){
+
+    const medal=levels[currentLevel].medal;
+
+    document.getElementById("medal").textContent=medal;
+
+    score+=50;
+
+    document.getElementById("score").textContent=score;
+
+    currentLevel++;
+
+    if(currentLevel>=levels.length){
+
+        document.getElementById("finalScore").textContent=score;
+        document.getElementById("finalMedal").textContent=
+            levels[levels.length-1].medal;
+
+        document.getElementById("finalScreen").style.display="flex";
+        return;
+    }
+
+    document.getElementById("level").textContent=currentLevel+1;
+
+    document.getElementById("message").innerHTML=
+        "🎉 Nivel completado";
+
+    setTimeout(()=>{
+        startLevel();
+    },800);
+}
+
+function startLevel(){
+
+    const size=levels[currentLevel].size;
+
+    document.getElementById("level").textContent=
+        currentLevel+1;
+
+    generateMaze(size);
+}
+
+document.getElementById("up").addEventListener("click",()=>move(0,-1));
+document.getElementById("down").addEventListener("click",()=>move(0,1));
+document.getElementById("left").addEventListener("click",()=>move(-1,0));
+document.getElementById("right").addEventListener("click",()=>move(1,0));
+
+document.addEventListener("keydown",(e)=>{
+    if(e.key==="ArrowUp") move(0,-1);
+    if(e.key==="ArrowDown") move(0,1);
+    if(e.key==="ArrowLeft") move(-1,0);
+    if(e.key==="ArrowRight") move(1,0);
+});
+
+document.getElementById("restart").addEventListener("click",()=>{
+    currentLevel=0;
+    score=0;
+
+    document.getElementById("score").textContent=0;
+    document.getElementById("medal").textContent="-";
+    document.getElementById("message").textContent="";
+    document.getElementById("finalScreen").style.display="none";
+
+    startLevel();
+});
+
+window.addEventListener("resize",()=>{
+    setTimeout(updatePlayer,100);
+});
+
+startLevel();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ballena Saltarina Kids</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden}
+
+#game{
+position:relative;
+width:100vw;
+height:100vh;
+overflow:hidden;
+background:linear-gradient(#7be9ff,#3fcfff,#0099dd,#005f9c);
+}
+
+/* OCÉANO */
+#ocean{
+position:absolute;
+inset:0;
+background: radial-gradient(circle at 20% 30%,rgba(255,255,255,.2) 2px,transparent 3px);
+background-size:120px 120px;
+animation:ocean 25s linear infinite;
+}
+
+@keyframes ocean{
+from{transform:translateX(0)}
+to{transform:translateX(-120px)}
+}
+
+/* HUD */
+#hud{
+position:absolute;
+top:10px;
+left:10px;
+z-index:1000;
+color:white;
+text-shadow:2px 2px 4px black;
+}
+
+#score{font-size:22px;font-weight:bold}
+#lives{font-size:30px}
+#medal{font-size:18px}
+
+/* BALLENA */
+#whale{
+position:absolute;
+left:30px;
+bottom:160px;
+font-size:110px;
+transition:bottom .2s ease;
+animation:tail .5s infinite alternate;
+}
+
+@keyframes tail{
+from{transform:rotate(-2deg)}
+to{transform:rotate(2deg)}
+}
+
+/* OBJETOS */
+.object{position:absolute;font-size:50px}
+
+.fish{
+position:absolute;
+font-size:35px;
+opacity:.7;
+animation:swim 10s linear forwards;
+}
+
+@keyframes swim{
+from{transform:translateX(120vw)}
+to{transform:translateX(-200px)}
+}
+
+.bubble{
+position:absolute;
+font-size:25px;
+animation:rise 6s linear forwards;
+}
+
+@keyframes rise{
+from{transform:translateY(100vh)}
+to{transform:translateY(-120px)}
+}
+
+/* CONTROLES */
+#controls{
+position:absolute;
+bottom:10px;
+width:100%;
+display:flex;
+justify-content:center;
+gap:15px;
+}
+
+.btn{
+border:none;
+padding:18px 25px;
+font-size:22px;
+border-radius:15px;
+font-weight:bold;
+}
+
+.jump{background:#ffd54f}
+.down{background:#81d4fa}
+
+/* GAME OVER */
+#gameOver{
+display:none;
+position:absolute;
+inset:0;
+background:rgba(0,0,0,0.85);
+color:white;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+}
+
+#restart{
+margin-top:20px;
+padding:15px 25px;
+font-size:22px;
+border:none;
+border-radius:12px;
+background:#4caf50;
+color:white;
+}
+
+/* START SCREEN */
+#startScreen{
+position:absolute;
+inset:0;
+background:rgba(0,0,0,0.85);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+}
+
+#startBox{
+background:white;
+padding:25px;
+border-radius:20px;
+text-align:center;
+max-width:300px;
+}
+
+#startWhale{
+font-size:80px;
+animation:wave 1s infinite alternate;
+}
+
+@keyframes wave{
+from{transform:rotate(-10deg)}
+to{transform:rotate(10deg)}
+}
+
+#startBtn{
+margin-top:15px;
+padding:15px 25px;
+font-size:22px;
+border:none;
+border-radius:12px;
+background:#4caf50;
+color:white;
+font-weight:bold;
+}
+
+@media (max-width:768px){
+#whale{font-size:95px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<!-- START SCREEN -->
+<div id="startScreen">
+<div id="startBox">
+
+<div id="startWhale">🐋👋</div>
+
+<h2>Ayuda a la ballena</h2>
+
+<div style="font-size:20px;margin:10px 0">
+🟢 ATRAPA:<br>
+🦐 ⭐ 🫧<br><br>
+🔴 EVITA:<br>
+🛢️ 🥤 🛍️ 🕸️
+</div>
+
+<button id="startBtn">▶ INICIAR</button>
+</div>
+</div>
+
+<div id="ocean"></div>
+
+<div id="hud">
+<div id="score">⭐ 0</div>
+<div id="lives">❤️❤️❤️</div>
+<div id="medal"></div>
+</div>
+
+<div id="whale">🐋</div>
+
+<div id="controls">
+<button class="btn jump" id="upBtn">⬆</button>
+<button class="btn down" id="downBtn">⬇</button>
+</div>
+
+<div id="gameOver">
+<h1>🌊 Fin del Juego</h1>
+<h2 id="finalScore"></h2>
+<h2 id="finalMedal"></h2>
+<button id="restart">Reiniciar</button>
+</div>
+
+</div>
+
+<script>
+
+const whale=document.getElementById("whale");
+const game=document.getElementById("game");
+
+const startScreen=document.getElementById("startScreen");
+const startBtn=document.getElementById("startBtn");
+
+const scoreEl=document.getElementById("score");
+const livesEl=document.getElementById("lives");
+const medalEl=document.getElementById("medal");
+
+const gameOver=document.getElementById("gameOver");
+const finalScore=document.getElementById("finalScore");
+const finalMedal=document.getElementById("finalMedal");
+
+const isMobile=window.innerWidth<768;
+
+let whaleY=160;
+let score=0;
+let lives=3;
+let running=false;
+
+let level=1;
+let baseSpeed=isMobile?2200:1300;
+
+/* INICIO */
+startBtn.onclick=()=>{
+startScreen.style.display="none";
+running=true;
+loopSpawn();
+};
+
+/* HUD */
+function updateHUD(){
+scoreEl.innerHTML="⭐ "+score;
+
+let hearts="";
+for(let i=0;i<3;i++){
+hearts+=i<lives?"❤️":"🤍";
+}
+livesEl.innerHTML=hearts;
+
+if(score>=200)medalEl.innerHTML="🥇 Héroe";
+else if(score>=100)medalEl.innerHTML="🥈 Protector";
+else if(score>=50)medalEl.innerHTML="🥉 Amigo";
+}
+
+/* MENSAJE */
+function showMessage(text){
+const m=document.createElement("div");
+m.innerHTML=text;
+m.style.position="absolute";
+m.style.top="40%";
+m.style.left="50%";
+m.style.transform="translate(-50%,-50%)";
+m.style.background="white";
+m.style.padding="15px";
+m.style.borderRadius="12px";
+m.style.fontSize="22px";
+document.body.appendChild(m);
+setTimeout(()=>m.remove(),1500);
+}
+
+/* NIVEL */
+function checkLevel(){
+if(score>=200&&level===1){
+level=2;
+baseSpeed=isMobile?1700:1100;
+showMessage("Nivel 2 🟡");
+}
+if(score>=400&&level===2){
+level=3;
+baseSpeed=isMobile?1400:900;
+showMessage("Nivel 3 🔴");
+}
+}
+
+/* MOVIMIENTO */
+function jump(){
+if(!running)return;
+whaleY+=140;
+whale.style.bottom=whaleY+"px";
+}
+
+function dive(){
+if(!running)return;
+whaleY-=140;
+if(whaleY<20)whaleY=20;
+whale.style.bottom=whaleY+"px";
+}
+
+upBtn.onclick=jump;
+downBtn.onclick=dive;
+
+document.addEventListener("keydown",e=>{
+if(!running)return;
+if(e.code==="ArrowUp"||e.code==="Space")jump();
+if(e.code==="ArrowDown")dive();
+});
+
+document.addEventListener("touchstart",e=>{
+if(!running)return;
+e.touches[0].clientX<window.innerWidth/2?jump():dive();
+});
+
+/* OBJETOS */
+function spawnObject(){
+if(!running)return;
+
+const obj=document.createElement("div");
+obj.className="object";
+
+const good=Math.random()<0.6;
+
+if(good){
+obj.innerHTML=["🦐","⭐","🫧"][Math.floor(Math.random()*3)];
+obj.dataset.type="good";
+obj.dataset.points=[10,20,5][Math.floor(Math.random()*3)];
+}else{
+obj.innerHTML=["🛢️","🥤","🛍️","🕸️"][Math.floor(Math.random()*4)];
+obj.dataset.type="bad";
+}
+
+obj.style.left=window.innerWidth+"px";
+obj.style.bottom=(80+Math.random()*200)+"px";
+
+game.appendChild(obj);
+
+let x=window.innerWidth;
+
+const move=setInterval(()=>{
+x-=isMobile?5:8;
+obj.style.left=x+"px";
+
+const a=whale.getBoundingClientRect();
+const b=obj.getBoundingClientRect();
+
+if(a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top){
+
+if(obj.dataset.type==="good"){
+score+=parseInt(obj.dataset.points);
+}else{
+lives--;
+if(lives<=0)endGame();
+}
+
+updateHUD();
+checkLevel();
+obj.remove();
+clearInterval(move);
+}
+
+if(x<-200){
+obj.remove();
+clearInterval(move);
+}
+},25);
+}
+
+/* PECES */
+function createFish(){
+const f=document.createElement("div");
+f.className="fish";
+f.innerHTML=Math.random()>0.5?"🐟":"🐠";
+f.style.top=Math.random()*70+"%";
+game.appendChild(f);
+setTimeout(()=>f.remove(),10000);
+}
+
+/* BURBUJAS */
+function createBubble(){
+const b=document.createElement("div");
+b.className="bubble";
+b.innerHTML="🫧";
+b.style.left=Math.random()*100+"vw";
+game.appendChild(b);
+setTimeout(()=>b.remove(),6000);
+}
+
+/* GAME OVER */
+function endGame(){
+running=false;
+gameOver.style.display="flex";
+
+finalScore.innerHTML="Puntos: "+score;
+
+let medal="Sigue intentando";
+if(score>=200)medal="Héroe";
+else if(score>=100)medal="Protector";
+else if(score>=50)medal="Amigo";
+
+finalMedal.innerHTML=medal;
+}
+
+/* LOOP */
+function loopSpawn(){
+spawnObject();
+setTimeout(loopSpawn,baseSpeed);
+}
+
+setInterval(createFish,3000);
+setInterval(createBubble,1500);
+
+updateHUD();
+
+</script>
+
+</body>
+</html>

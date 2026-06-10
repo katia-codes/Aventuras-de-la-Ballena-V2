@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juego de Memoria-Ballenas</title>
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+overflow:auto;
+background:linear-gradient(#0077b6,#90e0ef);
+min-height:100vh;
+}
+#ocean{position:fixed;inset:0;overflow:hidden;}
+.bubble{position:absolute;font-size:40px;animation:rise linear infinite;opacity:.8}
+@keyframes rise{from{transform:translateY(100vh)}to{transform:translateY(-120px)}}
+
+.container{
+position:relative;
+z-index:2;
+text-align:center;
+padding:5px;
+color:white;
+}
+h1{font-size:2.2rem;text-shadow:2px 2px 8px #000}
+#stars{font-size:50px;margin:10px}
+
+#board{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+width:min(90vw,750px);
+gap:10px;
+margin:auto;
+}
+.card{
+width:100%;
+aspect-ratio:1/1;
+perspective:1000px;
+cursor:pointer;
+}
+.inner{position:relative;width:100%;height:100%;transition:.7s;transform-style:preserve-3d}
+.flip .inner{transform:rotateY(180deg)}
+.face{
+position:absolute;width:100%;height:100%;
+backface-visibility:hidden;border-radius:20px;
+overflow:hidden;
+box-shadow:0 6px 15px rgba(0,0,0,.4);
+}
+.front{
+background:linear-gradient(#00b4d8,#0077b6);
+display:flex;align-items:center;justify-content:center;
+font-size:90px;
+}
+.back{
+transform:rotateY(180deg);
+background:#ffffff;
+opacity:1;
+}
+.back img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+border-radius:18px;
+filter:
+brightness(1.25)
+contrast(1.15)
+saturate(1.35);
+}
+.matched{animation:glow 1s infinite alternate}
+@keyframes glow{from{box-shadow:0 0 10px gold}to{box-shadow:0 0 30px yellow}}
+button{
+padding:12px 25px;border:none;border-radius:15px;
+background:#ffb703;color:#000;font-size:1.2rem;font-weight:bold;
+cursor:pointer;margin-top:10px;
+}
+#win{
+display:none;
+position:fixed;inset:0;
+background:rgba(0,0,0,.85);
+color:white;
+z-index:10;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+}
+#medal{font-size:150px}
+#chest{font-size:120px;animation:bounce 1s infinite}
+@keyframes bounce{50%{transform:translateY(-15px)}}
+.reward{font-size:80px}
+
+/* AQUÍ PEGAS EL BLOQUE COMPLETO */
+
+/* TABLET */
+@media (max-width:900px){
+
+h1{
+font-size:2rem;
+}
+
+#board{
+grid-template-columns:repeat(4,1fr);
+width:95vw;
+gap:8px;
+}
+
+#stars{
+font-size:35px;
+}
+
+}
+
+/* CELULAR */
+@media (max-width:600px){
+
+body{
+overflow:auto;
+}
+
+h1{
+font-size:1.6rem;
+}
+
+#board{
+grid-template-columns:repeat(3,1fr);
+width:96vw;
+gap:6px;
+margin:auto;
+}
+
+
+.card{
+aspect-ratio:1/1;
+}
+
+.front{
+font-size:50px;
+}
+
+#stars{
+font-size:28px;
+}
+
+p{
+font-size:20px !important;
+}
+
+button{
+font-size:1rem;
+padding:10px 18px;
+}
+
+#medal{
+font-size:90px;
+}
+
+.reward{
+font-size:50px;
+}
+
+}
+
+/* CELULARES MUY PEQUEÑOS */
+@media (max-width:380px){
+
+#board{
+grid-template-columns:repeat(3,1fr);
+width:98vw;
+gap:4px;
+}
+
+.front{
+font-size:40px;
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div id="ocean"></div>
+
+<div class="container">
+<h1>🐋 Juego de Memoria-Ballenas⭐</h1>
+
+<div id="stars">☆ ☆ ☆ ☆ ☆</div>
+
+<p style="font-size:28px">Encuentra las 6 parejas</p>
+
+<div id="board"></div>
+<button onclick="volverMenu()">🏠 Menú Principal</button>
+</div>
+
+<div id="win">
+<div id="medal">🏆</div>
+<h1>¡Explorador del Océano!</h1>
+<div id="chest">📦</div>
+<div>
+<span class="reward">🐳</span>
+<span class="reward">🦐</span>
+<span class="reward">⭐</span>
+<span class="reward">🌊</span>
+</div>
+<h2>¡Ayudaste a las ballenas!</h2>
+</div>
+
+<audio id="ok" src=""></audio>
+
+<script>
+
+const images=[
+'https://i.ibb.co/YYRJ65T/ballena.jpg',
+'https://i.ibb.co/PZ2ZT1y8/canto.jpg',
+'https://i.ibb.co/nMmjrrFC/familia.jpg',
+'https://i.ibb.co/cKb1fFPm/krill.jpg',
+'https://i.ibb.co/mCjMQ6Gc/tipo.jpg',
+'https://i.ibb.co/JF59031g/plastico.jpg'
+];
+
+for(let i=0;i<25;i++){
+let b=document.createElement('div');
+b.className='bubble';
+b.textContent='🫧';
+b.style.left=Math.random()*100+'vw';
+b.style.animationDuration=(5+Math.random()*8)+'s';
+document.getElementById('ocean').appendChild(b);
+}
+
+let cards=[];
+images.forEach(i=>{cards.push(i);cards.push(i);});
+cards.sort(()=>Math.random()-0.5);
+
+let board=document.getElementById('board');
+
+cards.forEach(img=>{
+let c=document.createElement('div');
+c.className='card';
+c.dataset.img=img;
+c.innerHTML=`
+<div class="inner">
+<div class="face front">🐋</div>
+<div class="face back"><img src="${img}"></div>
+</div>`;
+board.appendChild(c);
+});
+
+let first=null;
+let lock=false;
+let matches=0;
+
+document.querySelectorAll('.card').forEach(card=>{
+
+card.onclick=()=>{
+
+if(lock || card.classList.contains('done') || card===first) return;
+
+card.classList.add('flip');
+
+if(!first){
+first=card;
+return;
+}
+
+if(first.dataset.img===card.dataset.img){
+
+first.classList.add('done','matched');
+card.classList.add('done','matched');
+
+matches++;
+
+let stars='';
+for(let i=0;i<matches;i++) stars+='⭐ ';
+for(let i=matches;i<5;i++) stars+='☆ ';
+document.getElementById('stars').innerHTML=stars;
+
+if(matches===6){
+
+setTimeout(()=>{
+
+document.getElementById('win').style.display='flex';
+
+},1000);
+
+}
+
+first=null;
+
+}else{
+
+lock=true;
+
+setTimeout(()=>{
+card.classList.remove('flip');
+first.classList.remove('flip');
+first=null;
+lock=false;
+},900);
+
+}
+
+};
+
+});
+
+</script>
+
+</body>
+</html>
