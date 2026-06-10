@@ -15,25 +15,24 @@ font-family:Arial, sans-serif;
 }
 
 body{
-height:100vh;
-overflow:hidden;
+min-height:100vh;
+overflow-x:hidden;
 background:linear-gradient(to bottom,#76d7ff,#0077b6,#023e8a);
 color:white;
 }
 
+/* Pantalla principal */
+
 .screen{
 width:100%;
-height:100vh;
+min-height:100vh;
 display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
-position:absolute;
-inset:0;
-}
-
-.hidden{
-display:none;
+padding:20px;
+position:relative;
+z-index:1;
 }
 
 /* Fondo Marino */
@@ -54,8 +53,12 @@ opacity:.7;
 }
 
 @keyframes rise{
-from{transform:translateY(0);}
-to{transform:translateY(-120vh);}
+from{
+transform:translateY(0);
+}
+to{
+transform:translateY(-120vh);
+}
 }
 
 .fish{
@@ -65,90 +68,77 @@ animation:swim 20s linear infinite;
 }
 
 @keyframes swim{
-from{transform:translateX(-150px);}
-to{transform:translateX(calc(100vw + 200px));}
+from{
+transform:translateX(-150px);
+}
+to{
+transform:translateX(calc(100vw + 200px));
+}
 }
 
 .seabed{
 position:fixed;
 bottom:0;
+left:0;
 width:100%;
-font-size:40px;
+font-size:clamp(20px,3vw,40px);
 text-align:center;
 z-index:-5;
+pointer-events:none;
 }
 
-/* Inicio */
-
+/* Título */
 
 .title{
-font-size:clamp(36px,5vw,70px);
+font-size:clamp(32px,6vw,70px);
 text-align:center;
-margin-bottom:30px;
+margin-bottom:40px;
 text-shadow:3px 3px 10px black;
+padding:0 10px;
 }
+
+/* Menú */
 
 .menu{
 display:flex;
 flex-direction:column;
 gap:20px;
+align-items:center;
+width:100%;
 }
 
 .menu button{
 width:min(90vw,500px);
 padding:20px;
-font-size:clamp(22px,3vw,36px);
+font-size:clamp(20px,3vw,36px);
 border:none;
 border-radius:25px;
 cursor:pointer;
 background:white;
 color:#023e8a;
 font-weight:bold;
+transition:0.3s;
+box-shadow:0 4px 12px rgba(0,0,0,0.3);
 }
 
 .menu button:hover{
 transform:scale(1.05);
 }
 
-.game-title{
-font-size:clamp(30px,4vw,60px);
-margin-bottom:20px;
+/* Móviles */
+
+@media (max-width:768px){
+
+.title{
+font-size:clamp(28px,8vw,50px);
+margin-bottom:30px;
 }
 
-.game-box{
-width:min(90vw,900px);
-height:min(60vh,500px);
-background:rgba(255,255,255,.15);
-border:3px solid white;
-border-radius:20px;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-padding:20px;
-font-size:clamp(22px,3vw,36px);
-text-align:center;
+.menu button{
+padding:18px;
+font-size:22px;
 }
 
-.home-btn{
-margin-top:20px;
-padding:15px 30px;
-font-size:clamp(20px,2vw,28px);
-border:none;
-border-radius:20px;
-cursor:pointer;
-background:white;
-color:#023e8a;
-font-weight:bold;
-}
-
-.home-btn:hover{
-transform:scale(1.05);
-}
-
-.whale{
-font-size:100px;
-margin-bottom:15px;
 }
 
 </style>
@@ -156,16 +146,16 @@ margin-bottom:15px;
 
 <body>
 
+<!-- Fondo Marino -->
 <div class="ocean" id="ocean"></div>
 
+<!-- Fondo inferior -->
 <div class="seabed">
 🌿 🪸 🌿 🪸 🌿 🪸 🌿 🪸 🌿 🪸 🌿
 </div>
 
-<!-- MENU PRINCIPAL -->
-
+<!-- Menú Principal -->
 <div id="menuScreen" class="screen">
-
 
 <div class="title">
 🐋 Aventuras de la Ballena 🐋
@@ -174,7 +164,7 @@ margin-bottom:15px;
 <div class="menu">
 
 <button onclick="window.location.href='memoria.html'">
-🧠 Juego de Memoria-Ballenas
+🧠 Juego de Memoria - Ballenas
 </button>
 
 <button onclick="window.location.href='ballena.html'">
@@ -189,66 +179,9 @@ margin-bottom:15px;
 
 </div>
 
-<!-- MEMORIA -->
-
-
-
-<div class="game-title">
-🧠 Juego de memoria-Ballenas
-</div>
-
-<div class="game-box">
-
-<div class="whale">🐋</div>
-
-<button onclick="window.location.href='./index.html'">
-🏠 Volver al Menú
-</button>
-</div>
-
-</div>
-
-<!-- SALTARINA -->
-
-<div class="game-title">
-🐋 Ballena Saltarina
-</div>
-
-<div class="game-box">
-
-<div class="whale">🐳</div>
-
-<button onclick="window.location.href='./index.html'">
-🏠 Volver al Menú
-</button>
-
-</div>
-
-</div>
-
-<!-- LABERINTO -->
-
-
-
-<div class="game-title">
-🦐 Gran Laberinto del Krill
-</div>
-
-<div class="game-box">
-
-<div class="whale">🦐</div>
-
-<button onclick="window.location.href='./index.html'">
-🏠 Volver al Menú
-</button>
-
-</div>
-
-</div>
-
 <script>
 
-/* Fondo Marino */
+/* Burbujas */
 
 const ocean = document.getElementById("ocean");
 
@@ -258,6 +191,7 @@ const bubble=document.createElement("div");
 
 bubble.className="bubble";
 bubble.innerHTML="🫧";
+
 bubble.style.left=Math.random()*100+"%";
 bubble.style.fontSize=(20+Math.random()*30)+"px";
 bubble.style.animationDuration=(5+Math.random()*10)+"s";
@@ -266,20 +200,21 @@ ocean.appendChild(bubble);
 
 }
 
+/* Peces */
+
 for(let i=0;i<10;i++){
 
 const fish=document.createElement("div");
 
 fish.className="fish";
 fish.innerHTML="🐠";
+
 fish.style.top=(10+Math.random()*70)+"%";
 fish.style.animationDelay=(Math.random()*10)+"s";
 
 ocean.appendChild(fish);
 
 }
-
-/* Navegación */
 
 </script>
 
