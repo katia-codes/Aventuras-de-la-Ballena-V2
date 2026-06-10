@@ -175,7 +175,32 @@ font-size:40px;
 }
 
 }
+.home-btn{
+position:fixed;
+top:10px;
+right:10px;
+z-index:9999;
+padding:12px 18px;
+border:none;
+border-radius:15px;
+background:white;
+color:#0077b6;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:0 3px 10px rgba(0,0,0,.3);
+}
 
+.home-btn:hover{
+transform:scale(1.05);
+}
+
+@media (max-width:600px){
+.home-btn{
+font-size:14px;
+padding:10px 14px;
+}
+}
 </style>
 </head>
 <body>
@@ -190,7 +215,9 @@ font-size:40px;
 <p style="font-size:28px">Encuentra las 6 parejas</p>
 
 <div id="board"></div>
-<button onclick="volverMenu()">🏠 Menú Principal</button>
+<button class="home-btn" onclick="window.location.href='index.html'">
+🏠 Menú Principal
+</button>
 </div>
 
 <div id="win">
