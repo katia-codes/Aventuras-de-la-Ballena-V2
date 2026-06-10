@@ -216,8 +216,6 @@ de Memorama de Ballenas.
 
 <!-- SALTARINA -->
 
-<div id="ballena" class="screen hidden">
-
 <div class="game-title">
 🐋 Ballena Saltarina
 </div>
@@ -241,7 +239,7 @@ de Ballena Saltarina.
 
 <!-- LABERINTO -->
 
-<div id="laberinto" class="screen hidden">
+
 
 <div class="game-title">
 🦐 Gran Laberinto del Krill
@@ -298,24 +296,6 @@ ocean.appendChild(fish);
 }
 
 /* Navegación */
-
-function showGame(id){
-
-document.getElementById("menuScreen").classList.add("hidden");
-
-document.getElementById(id).classList.remove("hidden");
-
-}
-
-function goHome(){
-
-document.querySelectorAll(".screen").forEach(s=>{
-s.classList.add("hidden");
-});
-
-document.getElementById("menuScreen").classList.remove("hidden");
-
-}
 
 </script>
 
