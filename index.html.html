@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐋 Aventuras de la Ballena 🐋</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+background:linear-gradient(to bottom,#76d7ff,#0077b6,#023e8a);
+color:white;
+}
+
+.screen{
+width:100%;
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+position:absolute;
+inset:0;
+}
+
+.hidden{
+display:none;
+}
+
+/* Fondo Marino */
+
+.ocean{
+position:fixed;
+inset:0;
+overflow:hidden;
+z-index:-10;
+}
+
+.bubble{
+position:absolute;
+bottom:-50px;
+font-size:30px;
+animation:rise linear infinite;
+opacity:.7;
+}
+
+@keyframes rise{
+from{transform:translateY(0);}
+to{transform:translateY(-120vh);}
+}
+
+.fish{
+position:absolute;
+font-size:40px;
+animation:swim 20s linear infinite;
+}
+
+@keyframes swim{
+from{transform:translateX(-150px);}
+to{transform:translateX(calc(100vw + 200px));}
+}
+
+.seabed{
+position:fixed;
+bottom:0;
+width:100%;
+font-size:40px;
+text-align:center;
+z-index:-5;
+}
+
+/* Inicio */
+
+
+.title{
+font-size:clamp(36px,5vw,70px);
+text-align:center;
+margin-bottom:30px;
+text-shadow:3px 3px 10px black;
+}
+
+.menu{
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.menu button{
+width:min(90vw,500px);
+padding:20px;
+font-size:clamp(22px,3vw,36px);
+border:none;
+border-radius:25px;
+cursor:pointer;
+background:white;
+color:#023e8a;
+font-weight:bold;
+}
+
+.menu button:hover{
+transform:scale(1.05);
+}
+
+.game-title{
+font-size:clamp(30px,4vw,60px);
+margin-bottom:20px;
+}
+
+.game-box{
+width:min(90vw,900px);
+height:min(60vh,500px);
+background:rgba(255,255,255,.15);
+border:3px solid white;
+border-radius:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+padding:20px;
+font-size:clamp(22px,3vw,36px);
+text-align:center;
+}
+
+.home-btn{
+margin-top:20px;
+padding:15px 30px;
+font-size:clamp(20px,2vw,28px);
+border:none;
+border-radius:20px;
+cursor:pointer;
+background:white;
+color:#023e8a;
+font-weight:bold;
+}
+
+.home-btn:hover{
+transform:scale(1.05);
+}
+
+.whale{
+font-size:100px;
+margin-bottom:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="ocean" id="ocean"></div>
+
+<div class="seabed">
+🌿 🪸 🌿 🪸 🌿 🪸 🌿 🪸 🌿 🪸 🌿
+</div>
+
+<!-- MENU PRINCIPAL -->
+
+<div id="menuScreen" class="screen">
+
+
+<div class="title">
+🐋 Aventuras de la Ballena 🐋
+</div>
+
+<div class="menu">
+
+<button onclick="showGame('memorama')">
+🧠 Memorama de Ballenas
+</button>
+
+<button onclick="showGame('saltarina')">
+🐋 Ballena Saltarina
+</button>
+
+<button onclick="showGame('laberinto')">
+🦐 Gran Laberinto del Krill
+</button>
+
+</div>
+
+</div>
+
+<!-- MEMORAMA -->
+
+<div id="memorama" class="screen hidden">
+
+<div class="game-title">
+🧠 Memorama de Ballenas
+</div>
+
+<div class="game-box">
+
+<div class="whale">🐋</div>
+
+<p>
+Aquí puedes insertar tu juego HTML
+de Memorama de Ballenas.
+</p>
+
+<button class="home-btn" onclick="goHome()">
+🏠 Volver al Menú
+</button>
+
+</div>
+
+</div>
+
+<!-- SALTARINA -->
+
+<div id="saltarina" class="screen hidden">
+
+<div class="game-title">
+🐋 Ballena Saltarina
+</div>
+
+<div class="game-box">
+
+<div class="whale">🐳</div>
+
+<p>
+Aquí puedes insertar tu juego HTML
+de Ballena Saltarina.
+</p>
+
+<button class="home-btn" onclick="goHome()">
+🏠 Volver al Menú
+</button>
+
+</div>
+
+</div>
+
+<!-- LABERINTO -->
+
+<div id="laberinto" class="screen hidden">
+
+<div class="game-title">
+🦐 Gran Laberinto del Krill
+</div>
+
+<div class="game-box">
+
+<div class="whale">🦐</div>
+
+<p>
+Aquí puedes insertar tu juego HTML
+de Gran Laberinto del Krill.
+</p>
+
+<button class="home-btn" onclick="goHome()">
+🏠 Volver al Menú
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* Fondo Marino */
+
+const ocean = document.getElementById("ocean");
+
+for(let i=0;i<40;i++){
+
+const bubble=document.createElement("div");
+
+bubble.className="bubble";
+bubble.innerHTML="🫧";
+bubble.style.left=Math.random()*100+"%";
+bubble.style.fontSize=(20+Math.random()*30)+"px";
+bubble.style.animationDuration=(5+Math.random()*10)+"s";
+
+ocean.appendChild(bubble);
+
+}
+
+for(let i=0;i<10;i++){
+
+const fish=document.createElement("div");
+
+fish.className="fish";
+fish.innerHTML="🐠";
+fish.style.top=(10+Math.random()*70)+"%";
+fish.style.animationDelay=(Math.random()*10)+"s";
+
+ocean.appendChild(fish);
+
+}
+
+/* Navegación */
+
+function showGame(id){
+
+document.getElementById("menuScreen").classList.add("hidden");
+
+document.getElementById(id).classList.remove("hidden");
+
+}
+
+function goHome(){
+
+document.querySelectorAll(".screen").forEach(s=>{
+s.classList.add("hidden");
+});
+
+document.getElementById("menuScreen").classList.remove("hidden");
+
+}
+
+</script>
+
+</body>
+</html>
